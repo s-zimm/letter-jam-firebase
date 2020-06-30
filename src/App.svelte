@@ -1,5 +1,15 @@
 <script>
-	let name = 'world';
+	import Home from './Components/Home.svelte';
+	import Navbar from './Components/Navbar.svelte';
 </script>
+<style>
+	div.app-container {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+</style>
 
-<h1>Hello {name}!</h1>
+<div class="app-container">
+	<Navbar />
+</div>
