@@ -21,19 +21,23 @@
 </style>
 
 <script>
+    import { Link } from 'svelte-routing';
+    import Button from './Button.svelte';
+
     const navItems = [
-        { name: 'Start Game', route: '/game/start' },
-        { name: 'Join Game', route: '/game/join' }
+        { name: 'Start Game', route: 'game/start' },
+        { name: 'Join Game', route: 'game/join' }
     ]
 
-    import Button from './Button.svelte';
 </script>
 
 <div class="navbar">
     <div class="logo">LOGO</div>
     <div class="nav-items">
         {#each navItems as item}
-            <Button text={item.name}/>
+            <Link to={item.route}>
+                <Button text={item.name} />
+            </Link>
         {/each}
     </div>
 </div>
