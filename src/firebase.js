@@ -11,3 +11,4 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 export const db = firebase.firestore();
+export const arrayUnion = firebase.firestore.FieldValue.arrayUnion;

@@ -1,18 +1,21 @@
 <script>
     import FlexContainer from './FlexContainer.svelte';
     import Button from './Button.svelte';
-    import { onMount } from 'svelte';
     import { db } from '../firebase.js';
-    import { room } from '../store';
-    import { get } from 'svelte/store';
+    import { room, playerName } from '../store';
+    import { navigate } from "svelte-routing";
 
     let name = '';
 
     function generateNewRoom() {
         db.collection('rooms').add({
-            players: [{ name }]
+            players: [{ name }],
+            gameStarted: false 
         }).then(docRef => {
-            room.update(current => ({...current, roomCode: docRef.id}));
+            const roomCode = docRef.id;
+            room.update(current => ({ roomCode, players: [{ name }], gameStarted: false }));
+            playerName.update(n => name);
+            navigate(`/room/${roomCode}`);
         })
     }
 </script>

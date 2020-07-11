@@ -3,6 +3,7 @@
 	import Home from './Components/Home.svelte';
 	import Navbar from './Components/Navbar.svelte';
 	import StartGame from './Components/StartGame.svelte';
+	import Room from './Components/Room.svelte';
 
 	export let url = "";
 </script>
@@ -23,6 +24,7 @@
 		<Navbar />
 		<div class="main-content-container">
 			<Route component={StartGame} path="game/start"/>
+			<Route path="room/:code" let:params><Room roomCode={params.code} /></Route>
 		</div>
 	</div>
 </Router>
