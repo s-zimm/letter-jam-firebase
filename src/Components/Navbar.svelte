@@ -36,7 +36,7 @@
     <div class="nav-items">
         {#each navItems as item}
             <Link to={item.route}>
-                <Button text={item.name} />
+                <Button>{item.name}</Button>
             </Link>
         {/each}
     </div>

@@ -6,6 +6,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        text-align: center;
         border-radius: 5px;
         box-shadow: 0 2px 4px rgb(148, 148, 148);
         transition: all .2s;
@@ -29,8 +30,7 @@
 
 <script>
     export let type;
-    export let text;
 
 </script>
 
-<div class="button {type ? type : 'default'}">{text}</div>
+<div on:click class="button {type ? type : 'default'}"><slot></slot></div>
