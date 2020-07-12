@@ -2,6 +2,7 @@
     import WaitingRoom from './WaitingRoom.svelte';
     import FlexContainer from './FlexContainer.svelte';
     import JoinGame from './JoinGame.svelte';
+    import Game from './Game.svelte'
 
     export let roomCode;
     import { room, playerName } from '../store';
@@ -17,7 +18,7 @@
 
 <FlexContainer>
     {#if $room.gameStarted}
-        Game Started!!!
+        <Game />
     {:else if !$playerName}
         <JoinGame {roomCode} />
     {:else}
