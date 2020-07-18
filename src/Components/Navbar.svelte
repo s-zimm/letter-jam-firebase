@@ -1,7 +1,7 @@
 <style>
     div.navbar {
         width: 100%;
-        height: 60px;
+        height: 9%;
         display: flex;
         justify-content: space-between;
         align-items: center;
