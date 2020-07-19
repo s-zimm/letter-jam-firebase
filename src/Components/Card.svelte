@@ -3,7 +3,6 @@
     const dispatch = createEventDispatcher();
 
     export let letter;
-    export let index;
     export let disabled = false;
     export let selected = false;
 

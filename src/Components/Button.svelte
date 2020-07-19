@@ -13,24 +13,30 @@
         cursor: pointer;
     }
 
-    .button:hover {
+    .button:hover:not(.disabled) {
         box-shadow: 0 2px 8px rgb(148, 148, 148);
     }
 
     .default {
-        background-color: gray;
-        color: rgba(240, 248, 255, 0.856);
+        background-color: rgba(131, 191, 237, 0.824);
+        color: rgba(255, 255, 255, 0.856);
     }
 
-    .default:hover {
-        background-color: rgb(94, 94, 94);
-        color: aliceblue;
+    .default:hover:not(.disabled) {
+        background-color: rgb(131, 191, 237);
+        color: rgb(255, 255, 255);
+    }
+
+    .disabled {
+        cursor: default;
+        background-color: gray;
     }
 </style>
 
 <script>
     export let type;
+    export let disabled = false;
 
 </script>
 
-<div on:click class="button {type ? type : 'default'}"><slot></slot></div>
+<div on:click class:disabled class="button {type ? type : 'default'}"><slot></slot></div>

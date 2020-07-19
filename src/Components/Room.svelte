@@ -4,10 +4,10 @@
     import JoinGame from './JoinGame.svelte';
     import Game from './Game.svelte'
 
-    export let roomCode;
     import { room, playerName } from '../store';
     import { db } from '../firebase.js';
 
+    export let roomCode;
     db.collection('rooms')
         .doc(roomCode)
         .onSnapshot(doc => {
