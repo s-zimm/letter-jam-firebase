@@ -25,7 +25,7 @@
         const dbRoomRef = db.collection('rooms').doc($roomCodeState);
         const theRoom = await dbRoomRef.get();
         const updatedPlayers = theRoom.data().players.map(player => 
-            player.name === $playerName ? ({ ...player, chosenSecretWord: { word, letters: word.split() } }) : ({ ...player }));
+            player.name === $playerName ? ({ ...player, chosenSecretWord: { word, letters: word.split("") } }) : ({ ...player }));
         dbRoomRef.update({ players: updatedPlayers });
         lockedIn = true;
     }
@@ -33,8 +33,8 @@
     let word = '';
     let maxLength = 5;
     let lockedIn = false;
-    let allPlayersLockedIn = !$room.players.find(player => !player.chosenSecretWord);
     export let selectedIndexes = [];
+    $: allPlayersLockedIn = !$room.players.find(player => !player.chosenSecretWord);
     $: maxLengthReached = word.length === maxLength;
 </script>
 
@@ -67,7 +67,7 @@
     }
 </style>
 
-<FlexContainer direction="column" justify="center" align="center">
+<FlexContainer direction="column" justify="center" align="center" height="100%">
     {#if $room.players[0].initialCards && !allPlayersLockedIn}
         <div class="full-word-container">
             <div class="letters">
