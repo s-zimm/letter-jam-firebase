@@ -9,8 +9,9 @@
 
     }
 
-    .logo {
-        width: 10%;
+    img {
+        max-width: 100%;
+        max-height: 70%;
     }
 </style>
 
@@ -27,7 +28,9 @@
 </script>
 
 <div class="navbar">
-    <div class="logo">LOGO</div>
+    <FlexContainer justify="center" align="center" width="70px" height="100%">
+        <img src="/images/bluebnstrawb.png" alt="Logo" />
+    </FlexContainer>
     <FlexContainer justify="space-around" width="380px">
         {#each navItems as item}
             <Link to={item.route}>
