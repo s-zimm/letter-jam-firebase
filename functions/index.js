@@ -15,6 +15,33 @@ exports.startGame = functions.firestore
     "E", "E", "E", "E", "F", "F", "G", "G", "H", "H", "H", "I", "I", "I", "I", "K", "K", "L", "L", 
     "L", "M", "M", "N", "N", "N", "O", "O", "O", "O", "P", "P", "R", "R", "R", "R", "S", "S", "S", 
     "S", "T", "T", "T", "T", "U", "U", "U", "W", "W", "Y", "Y"];
+    const gameSetupConfig = {
+      2: {
+        requiredPerPlayer: 3,
+        total: 11,
+        standConfig: [7, 8, 9, 10],
+      },
+      3: {
+        requiredPerPlayer: 2,
+        total: 11,
+        standConfig: [7, 8, 9],
+      },
+      4: {
+        requiredPerPlayer: 1,
+        total: 11,
+        standConfig: [7, 8],
+      },
+      5: {
+        requiredPerPlayer: 1,
+        total: 11,
+        standConfig: [7],
+      },
+      6: {
+        requiredPerPlayer: 1,
+        total: 11,
+        standConfig: null,
+      },
+    };
     const shuffle = (array) => {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * i);
@@ -26,8 +53,8 @@ exports.startGame = functions.firestore
     };
 
     if (!previousRoomRef.gameStarted && currentRoomRef.gameStarted) {
-      const shuffledDeck = shuffle(fullLettersList);
-      const numPlayers = currentRoomRef.players.length;
+	  const shuffledDeck = shuffle(fullLettersList);
+	  const numPlayers = currentRoomRef.players.length;
       const sectionSize = Math.floor(shuffledDeck.length / numPlayers);
       const deckSplitsForInitialWords = [];
 
@@ -53,10 +80,11 @@ exports.startGame = functions.firestore
       currentRoomRef.gamePhase &&
       currentRoomRef.gamePhase === "secretWordSetup"
     ) {
-      const lettersListWithoutSecretWordLetters = [...fullLettersList];
+	  const lettersListWithoutSecretWordLetters = [...fullLettersList];
+	  const numPlayers = currentRoomRef.players.length;
       const playerListWithDealtSecretWords = currentRoomRef.players.map(
         (player, i) => {
-          if (i === currentRoomRef.players.length - 1) {
+          if (i === numPlayers - 1) {
             return {
               ...player,
               secretWord: {
@@ -93,13 +121,21 @@ exports.startGame = functions.firestore
         }
       });
 
-      db.collection("rooms")
-        .doc(roomCode)
-        .update({
-          players: playerListWithDealtSecretWords,
-          shuffledDeck: shuffle(lettersListWithoutSecretWordLetters),
-          // THIS LINE IS EXTREMELY IMPORTANT AS IT STOPS THE FN FROM INFINITELY LOOPING
-          gamePhase: "main",
-        });
+      const shuffledDeck = shuffle(lettersListWithoutSecretWordLetters);
+      const gameConfig = gameSetupConfig[numPlayers];
+      let nonPlayerStands = null;
+      if (numPlayers < 6) {
+        nonPlayerStands = gameConfig.standConfig.reduce((obj, numCards, i) =>
+			({ ...obj, [i]: shuffledDeck.splice(0, numCards) }), {}
+        );
+      }
+      db.collection("rooms").doc(roomCode).update({
+        players: playerListWithDealtSecretWords,
+        shuffledDeck,
+		nonPlayerStands,
+		cluesConfig: gameConfig,
+        // THIS LINE IS EXTREMELY IMPORTANT AS IT STOPS THE FN FROM INFINITELY LOOPING
+        gamePhase: "main",
+      });
     }
   });
