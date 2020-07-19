@@ -1,3 +1,17 @@
+<script>
+    import { createEventDispatcher, beforeUpdate, afterUpdate } from 'svelte';
+    const dispatch = createEventDispatcher();
+
+    export let letter;
+    export let index;
+    export let disabled = false;
+    export let selected = false;
+
+    const handleClick = () => {
+        dispatch('click', letter);
+    }
+</script>
+
 <style>
     .card {
         border: solid #9e9e9e 1px;
@@ -9,9 +23,19 @@
         background-color: white;
     }
 
-    .card:hover {
+    .enabled {
+        cursor: pointer;
+    }
+
+    .enabled:hover {
         box-shadow: 1px 2px 7px #bfbfbf, -1px 2px 7px #bfbfbf;
-        transform: translateY(-3px)
+        transform: translateY(-3px);
+    }
+
+    .selected {
+        box-shadow: 1px 2px 7px #bfbfbf, -1px 2px 7px #bfbfbf;
+        transform: translateY(-3px);
+        border: solid red 2px;
     }
 
     .top-letter {
@@ -29,13 +53,18 @@
     }
 </style>
 
-<script>
-    export let letter;
-</script>
-
-<div class="card" on:click>
-    <div class="top-letter">{letter}</div>
-    <div class="main-letter">
-        {letter}
+{#if !disabled}
+    <div class="card enabled" class:selected on:click={handleClick}>
+        <div class="top-letter">{letter}</div>
+        <div class="main-letter">
+            {letter}
+        </div>
     </div>
-</div>
+{:else}
+    <div class="card disabled" class:selected>
+        <div class="top-letter">{letter}</div>
+        <div class="main-letter">
+            {letter}
+        </div>
+    </div>
+{/if}
