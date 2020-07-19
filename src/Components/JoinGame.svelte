@@ -2,11 +2,14 @@
     import FlexContainer from './FlexContainer.svelte';
     import Button from './Button.svelte';
     import { navigate } from 'svelte-routing';
-    import { playerName } from '../store';
+    import { playerName, roomCodeState } from '../store';
     import { db, arrayUnion } from '../firebase.js';
+    import { onMount } from 'svelte';
 
     let name = '';
     export let roomCode;
+
+    onMount(() => roomCodeState.set(roomCode))
 
     const joinRoom = () => {
         playerName.update(n => name);

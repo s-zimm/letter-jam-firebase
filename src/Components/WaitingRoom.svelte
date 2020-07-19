@@ -12,7 +12,7 @@
     export let roomCode;
 
 const startGame = () => {
-    db.collection('rooms').doc(roomCode).update({ gameStarted: true })
+    db.collection('rooms').doc(roomCode).update({ gameStarted: true, gamePhase: 'secretWordSetup' })
 }
 
 </script>
