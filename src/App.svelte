@@ -16,7 +16,7 @@
 
 	div.main-content-container {
 		height: 91%;
-		overflow: scroll;
+		overflow-y: scroll;
 		display: block;
 	}
 </style>

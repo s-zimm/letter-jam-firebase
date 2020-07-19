@@ -8,6 +8,7 @@
     let name = '';
 
     function generateNewRoom() {
+        name = name.trim();
         db.collection('rooms').add({
             players: [{ name }],
             gameStarted: false
