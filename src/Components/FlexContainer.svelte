@@ -9,8 +9,12 @@
     export let direction = "";
     export let align = "";
     export let justify = "";
+    export let width = "100%";
+    export let height = "";
 </script>
 
-<div class="flex-container" style="flex-direction:{direction};align-items:{align};justify-content:{justify}">
+<div 
+    class="flex-container"
+    style="flex-direction:{direction};align-items:{align};justify-content:{justify};width:{width};height:{height}">
     <slot></slot>
 </div>

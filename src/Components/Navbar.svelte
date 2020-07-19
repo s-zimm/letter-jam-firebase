@@ -12,17 +12,12 @@
     .logo {
         width: 10%;
     }
-
-    .nav-items {
-        width: 35%;
-        display: flex;
-        justify-content: space-around;
-    }
 </style>
 
 <script>
     import { Link } from 'svelte-routing';
     import Button from './Button.svelte';
+    import FlexContainer from './FlexContainer.svelte';
 
     const navItems = [
         { name: 'Start Game', route: 'game/start' },
@@ -33,11 +28,11 @@
 
 <div class="navbar">
     <div class="logo">LOGO</div>
-    <div class="nav-items">
+    <FlexContainer justify="space-around" width="380px">
         {#each navItems as item}
             <Link to={item.route}>
                 <Button>{item.name}</Button>
             </Link>
         {/each}
-    </div>
+    </FlexContainer>
 </div>
