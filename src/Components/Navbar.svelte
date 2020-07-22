@@ -16,9 +16,10 @@
 </style>
 
 <script>
-    import { Link } from 'svelte-routing';
+    import { Link, navigate } from 'svelte-routing';
     import Button from './Button.svelte';
     import FlexContainer from './FlexContainer.svelte';
+    import { room, playerName } from '../store';
 
     const navItems = [
         { name: 'Start Game', route: 'game/start' },
@@ -28,14 +29,22 @@
 </script>
 
 <div class="navbar">
-    <FlexContainer justify="center" align="center" width="70px" height="100%">
-        <img src="/images/bluebnstrawb.png" alt="Logo" />
+    <FlexContainer justify="center" align="center" width="10%" height="100%">
+        <img on:click={() => navigate('/')} src="/images/bluebnstrawb.png" alt="Logo" />
     </FlexContainer>
-    <FlexContainer justify="space-around" width="380px">
-        {#each navItems as item}
-            <Link to={item.route}>
-                <Button>{item.name}</Button>
-            </Link>
-        {/each}
-    </FlexContainer>
+    {#if !$room.gameStarted}
+        <FlexContainer justify="space-around" width="380px">
+            {#each navItems as item}
+                <Link to={item.route}>
+                    <Button>{item.name}</Button>
+                </Link>
+            {/each}
+        </FlexContainer>
+    {:else if $room.currentClue}
+        <FlexContainer width="90%" height="100%" justify="center" align="center">
+            {#each $room.currentClue as { letter, player }}
+                <span style="margin:5px">{player === $playerName ? '?' : letter}</span>
+            {/each}       
+        </FlexContainer>
+    {/if}
 </div>
