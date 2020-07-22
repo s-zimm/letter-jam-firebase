@@ -53,8 +53,8 @@ exports.startGame = functions.firestore
     };
 
     if (!previousRoomRef.gameStarted && currentRoomRef.gameStarted) {
-	  const shuffledDeck = shuffle(fullLettersList);
-	  const numPlayers = currentRoomRef.players.length;
+      const shuffledDeck = shuffle(fullLettersList);
+      const numPlayers = currentRoomRef.players.length;
       const sectionSize = Math.floor(shuffledDeck.length / numPlayers);
       const deckSplitsForInitialWords = [];
 
@@ -80,8 +80,8 @@ exports.startGame = functions.firestore
       currentRoomRef.gamePhase &&
       currentRoomRef.gamePhase === "secretWordSetup"
     ) {
-	  const lettersListWithoutSecretWordLetters = [...fullLettersList];
-	  const numPlayers = currentRoomRef.players.length;
+      const lettersListWithoutSecretWordLetters = [...fullLettersList];
+      const numPlayers = currentRoomRef.players.length;
       const playerListWithDealtSecretWords = currentRoomRef.players.map(
         (player, i) => {
           if (i === numPlayers - 1) {
@@ -93,6 +93,8 @@ exports.startGame = functions.firestore
                   currentRoomRef.players[0].chosenSecretWord.letters
                 ),
               },
+              clues: [],
+              currentVisibleIndex: 0,
             };
           } else {
             return {
@@ -103,6 +105,8 @@ exports.startGame = functions.firestore
                   currentRoomRef.players[i + 1].chosenSecretWord.letters
                 ),
               },
+              clues: [],
+              currentVisibleIndex: 0,
             };
           }
         }
@@ -124,16 +128,29 @@ exports.startGame = functions.firestore
       const shuffledDeck = shuffle(lettersListWithoutSecretWordLetters);
       const gameConfig = gameSetupConfig[numPlayers];
       let nonPlayerStands = null;
+      const cluesLeft = [];
+      for (var ndex = 0; ndex < gameConfig.requiredPerPlayer * numPlayers; ndex++) {
+        cluesLeft.push("red");
+      }
+      for (var ndex2 = 0; ndex2 < gameConfig.total - (gameConfig.requiredPerPlayer * numPlayers); ndex2++) {
+        cluesLeft.push("green");  
+      }
+      gameConfig.requiredPerPlayer
       if (numPlayers < 6) {
-        nonPlayerStands = gameConfig.standConfig.reduce((obj, numCards, i) =>
-			({ ...obj, [i]: shuffledDeck.splice(0, numCards) }), {}
+        nonPlayerStands = gameConfig.standConfig.reduce(
+          (obj, numCards, i) => ({
+            ...obj,
+            [i]: shuffledDeck.splice(0, numCards),
+          }),
+          {}
         );
       }
       db.collection("rooms").doc(roomCode).update({
         players: playerListWithDealtSecretWords,
         shuffledDeck,
-		nonPlayerStands,
-		cluesConfig: gameConfig,
+        nonPlayerStands,
+        cluesConfig: gameConfig,
+        cluesLeft,
         // THIS LINE IS EXTREMELY IMPORTANT AS IT STOPS THE FN FROM INFINITELY LOOPING
         gamePhase: "main",
       });
