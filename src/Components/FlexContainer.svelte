@@ -11,10 +11,11 @@
     export let justify = "";
     export let width = "100%";
     export let height = "";
+    export let wrap = "";
 </script>
 
 <div 
     class="flex-container"
-    style="flex-direction:{direction};align-items:{align};justify-content:{justify};width:{width};height:{height}">
+    style="flex-direction:{direction};align-items:{align};justify-content:{justify};width:{width};height:{height};flex-wrap:{wrap}">
     <slot></slot>
 </div>
