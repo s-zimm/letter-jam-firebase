@@ -37,7 +37,7 @@
     
 </script>
 
-<FlexContainer height="100%">
+<FlexContainer>
     {#if $room.gameStarted}
         <Game />
     {:else if !$playerName}

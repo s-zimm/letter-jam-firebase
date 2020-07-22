@@ -17,7 +17,7 @@
 {:else if allPlayersLockedIn}
     <MainGame />
 {:else}
-    <FlexContainer width="100%" height="100%" justify="center" align="center">
+    <FlexContainer width="100%" justify="center" align="center">
         <Loader />
     </FlexContainer>
 {/if}
