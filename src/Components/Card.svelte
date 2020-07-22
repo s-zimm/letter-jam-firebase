@@ -2,7 +2,7 @@
     import { createEventDispatcher, beforeUpdate, afterUpdate } from 'svelte';
     const dispatch = createEventDispatcher();
 
-    export let letter;
+    export let letter = "";
     export let disabled = false;
     export let selected = false;
 
@@ -14,8 +14,8 @@
 <style>
     .card {
         border: solid #9e9e9e 1px;
-        width: 120px;
-        height: 140px;
+        width: 100px;
+        height: 110px;
         border-radius: 5px;
         box-shadow: 1px 1px 3px #bfbfbf, -1px 1px 3px #bfbfbf;
         transition: ease .2s all;
