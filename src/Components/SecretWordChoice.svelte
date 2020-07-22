@@ -10,7 +10,7 @@
             return;
         } 
         word += letter;
-        selectedIndexes.push(i);
+        selectedIndexes = [ ...selectedIndexes, i ];
     }
 
     const resetWord = () => {
@@ -80,7 +80,12 @@
     </div>
     <div class="cards-container">
         {#each $room.players[0].initialCards as letter, i}
-            <Card {letter} disabled={maxLengthReached || lockedIn} on:click={(event) => handleCardClick(event.detail, i)}/>
+            <Card
+                selected={selectedIndexes.includes(i)}
+                {letter}
+                disabled={maxLengthReached || lockedIn}
+                on:click={(event) => handleCardClick(event.detail, i)}
+            />
         {/each}
     </div>
 </FlexContainer>
