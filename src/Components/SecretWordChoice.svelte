@@ -6,7 +6,7 @@
     import { db } from '../firebase.js';
 
      const handleCardClick = (letter, i) => {
-        if (maxLengthReached) {
+        if (maxLengthReached || selectedIndexes.includes(i)) {
             return;
         } 
         word += letter;
