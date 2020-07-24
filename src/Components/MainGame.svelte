@@ -40,7 +40,8 @@
     const handleConfirmSuggestion = async () => {
         confirmSuggestion = false;
         const roomRef = db.collection('rooms').doc($roomCodeState);
-        let updatedCluesLeft = [ ...$room.cluesLeft ];
+		let updatedCluesLeft = [ ...$room.cluesLeft ];
+		let updatedShuffledDeck = [ ...$room.shuffledDeck ];
         const updatedPlayers = $room.players.map(player => {
             if (player.name !== $playerName) {
                 return player;
@@ -60,17 +61,26 @@
 			...$room.nonPlayerStands
 		};
 		chosenNpcStandIndexes.forEach(index => {
-			if (updatedNpcStands[index].length === 1) {
-				cluesGivenFromNpcStands.push("green");
-			} 
-			updatedNpcStands[index].shift();
+			if (updatedNpcStands[index][0] !== 'END') {
+				// Checking for length === 2 because the last item is "END" to note empty stack.
+				// New letters will be appended after "END" item.
+				if (updatedNpcStands[index].length === 2) {
+					cluesGivenFromNpcStands.push("green");
+					updatedNpcStands[index].push(updatedShuffledDeck.shift());
+				} 
+				updatedNpcStands[index].shift();
+			} else {
+				updatedNpcStands[index].pop();
+				updatedNpcStands[index].push(updatedShuffledDeck.shift());
+			}
 		});
 		
         roomRef.update({ 
 			players: updatedPlayers,
 			cluesLeft: updatedCluesLeft.concat(cluesGivenFromNpcStands),
 			currentClue: letterObjects,
-			nonPlayerStands: updatedNpcStands
+			nonPlayerStands: updatedNpcStands,
+			shuffledDeck: updatedShuffledDeck
 		});
 		letterObjects = [];
 	}
@@ -128,6 +138,8 @@
 		currentLetterGuess = "";
 		movingOn = false;
 	}
+
+	const isEndNpcStack = (npc) => npc[0] === 'END';
 
 </script>
 
@@ -262,10 +274,10 @@
                     </FlexContainer>
                     {#each Object.values($room.nonPlayerStands) as npc, i}
                         <FlexContainer direction="column" width="13%" justify="center" align="center">
-                            <h3 style="text-align:center">{npc.length} left</h3>
+                            <h3 style="text-align:center">{isEndNpcStack(npc) ? 'Done!' : `${npc.length - 1} left`}</h3>
                             <Card 
 								selected={letterObjects.find(obj => obj.index === i && obj.player === 'NPC')}
-								letter={npc[0]}
+								letter={!isEndNpcStack(npc) ? npc[0] : npc[1]}
 								on:click={(event) => handleCardClick(event.detail, i, 'NPC')}
 							/>
                         </FlexContainer>

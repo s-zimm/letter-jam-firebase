@@ -140,7 +140,7 @@ exports.startGame = functions.firestore
         nonPlayerStands = gameConfig.standConfig.reduce(
           (obj, numCards, i) => ({
             ...obj,
-            [i]: shuffledDeck.splice(0, numCards),
+            [i]: shuffledDeck.splice(0, numCards).concat(["END"]),
           }),
           {}
         );
