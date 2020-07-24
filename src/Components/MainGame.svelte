@@ -1,16 +1,20 @@
 <script>
-    import { room, playerName, roomCodeState } from '../store';
+	import { room, playerName, roomCodeState } from '../store';
     import { db } from '../firebase.js';
     import Loader from './Loader.svelte';
     import FlexContainer from './FlexContainer.svelte';
     import Card from './Card.svelte';
     import Button from './Button.svelte';
-    import ClueToken from './ClueToken.svelte';
+	import ClueToken from './ClueToken.svelte';
+	import LetterSelect from './LetterSelect.svelte'
 
     let letterObjects = [];
-    let selectedIndexes = [];
+	let selectedIndexes = [];
+	let currentPlayerCards = [];
     let maxWordLength = false;
-    let confirmSuggestion
+	let confirmSuggestion;
+	let movingOn = false;
+	let currentLetterGuess = "";
 
     const handleCardClick = (letter, i, player) => {
         if (letterObjects.length === 8) {
@@ -21,7 +25,7 @@
         selectedIndexes = [ ...selectedIndexes, i ];
     }
 
-    const resetWord = () => {
+    const resetSuggestedWord = () => {
         maxWordLength = false;
         letterObjects = [];
         selectedIndexes = [];
@@ -53,7 +57,43 @@
 			currentClue: letterObjects
 		});
 		letterObjects = [];
-    }
+	}
+
+	const handleCancelGuess = () => {
+		currentLetterGuess = "";
+		movingOn = false;
+	}
+
+	const submitGuess = () => {
+		const updatedPlayers = $room.players.map(player => {
+            if (player.name !== $playerName) {
+                return player;
+			}
+
+			return {
+				...player,
+				guessedLetters: player.guessedLetters
+					? [ ...player.guessedLetters, currentLetterGuess ]
+					: [ currentLetterGuess ]
+			}
+		});
+
+		db.collection('rooms').doc($roomCodeState).update({
+			players: updatedPlayers
+		});
+		currentLetterGuess = "";
+		movingOn = false;
+	}
+
+	const buildCurrentPlayerCardsList = (player) => {
+		for (var i = 0; i < 5; i++) {
+			if (player.guessedLetters && player.guessedLetters[i]) {
+				currentPlayerCards = [ ...currentPlayerCards, player.guessedLetters[i] ]
+			} else {
+				currentPlayerCards = [ ...currentPlayerCards, "" ]
+			}
+		}
+	}
 </script>
 
 <style>
@@ -105,14 +145,30 @@
                     {:else if confirmSuggestion}
                         <span style="color:red">This will use one of your team's clues!</span>
                     {/if}
-                    <FlexContainer justify="space-around">
-                        <Button on:click={resetWord}>Reset word</Button>
-                        {#if !confirmSuggestion}
-                            <Button on:click={handleSuggest}>Suggest word</Button>
-                        {:else}
-                            <Button on:click={handleConfirmSuggestion}><span style="color:red">Are you sure?</span></Button>
-                        {/if}
-                    </FlexContainer>
+					<FlexContainer direction="column" justify="space-around">
+						<FlexContainer justify="space-around">
+							<Button on:click={resetSuggestedWord}>Reset word</Button>
+							{#if !confirmSuggestion}
+								<Button on:click={handleSuggest}>Suggest word</Button>
+							{:else}
+								<Button on:click={handleConfirmSuggestion}><span style="color:red">Are you sure?</span></Button>
+							{/if}
+						</FlexContainer>
+						<FlexContainer justify="center" align="center" direction="column">					
+							{#if movingOn}
+								{#if currentLetterGuess}
+									<Button on:click={submitGuess}>Confirm</Button>
+								{:else}
+									<Button on:click={handleCancelGuess}>Cancel</Button>
+								{/if}
+							{:else}
+								<Button on:click={() => movingOn = true}>Move On</Button>
+							{/if}
+							{#if movingOn}
+								<LetterSelect on:change={({ detail }) => currentLetterGuess = detail}/>
+							{/if}
+						</FlexContainer>
+					</FlexContainer>
                 </FlexContainer>
             </div>
         </FlexContainer>
@@ -128,19 +184,23 @@
                         {/if}
                     </FlexContainer>
                     <FlexContainer width="100%" justify="center" wrap="wrap">
-                        {#each player.secretWord.letters as letter, i}
-                            {#if player.name === $playerName}
-                                <Card />
-                            {:else if i === player.currentVisibleIndex}
-                                <Card
-									selected={letterObjects.find(obj => obj.index === i && obj.player === player.name)}
-									{letter}
-									on:click={(event) => handleCardClick(event.detail, i, player.name)}
-								/>
-                            {:else}
-                                <Card />
-                            {/if}
-                        {/each}
+						{#if player.name !== $playerName}
+							{#each player.secretWord.letters as letter, i}
+								{#if i === player.currentVisibleIndex}
+									<Card
+										selected={letterObjects.find(obj => obj.index === i && obj.player === player.name)}
+										{letter}
+										on:click={(event) => handleCardClick(event.detail, i, player.name)}
+									/>
+								{:else}
+									<Card />
+								{/if}
+							{/each}
+						{:else}
+							{#each Array(5) as _, i}
+								<Card letter={player.guessedLetters && player.guessedLetters[i] ? player.guessedLetters[i] : ""} subdued={true} />
+							{/each}
+						{/if}
                     </FlexContainer>
                 </div>
             {/each}
