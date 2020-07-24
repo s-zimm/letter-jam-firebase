@@ -101,7 +101,7 @@
 			}
 
 			let updatedPlayer;
-			if (player.guessedLetters && player.guessedLetters.length >= 4) {
+			if (player.guessedLetters && player.guessedLetters.length > 4) {
 				if (player.extraLetter) {
 					player.extraLetter === currentLetterGuess
 						? permanentBonusLetters.push(currentLetterGuess)
