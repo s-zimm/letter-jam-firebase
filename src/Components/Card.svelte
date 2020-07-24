@@ -5,6 +5,7 @@
     export let letter = "";
     export let disabled = false;
     export let selected = false;
+    export let subdued = false;
 
     const handleClick = () => {
         dispatch('click', letter);
@@ -50,10 +51,14 @@
         align-items: center;
         font-size: 60px;
     }
+
+    .subdued {
+        color: rgb(131, 131, 131);
+    }
 </style>
 
 {#if !disabled}
-    <div class="card enabled" class:selected on:click={handleClick}>
+    <div class="card enabled" class:subdued class:selected on:click={handleClick}>
         <div class="top-letter">{letter}</div>
         <div class="main-letter">
             {letter}
