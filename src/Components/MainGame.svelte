@@ -101,15 +101,6 @@
 		movingOn = false;
 	}
 
-	const buildCurrentPlayerCardsList = (player) => {
-		for (var i = 0; i < 5; i++) {
-			if (player.guessedLetters && player.guessedLetters[i]) {
-				currentPlayerCards = [ ...currentPlayerCards, player.guessedLetters[i] ]
-			} else {
-				currentPlayerCards = [ ...currentPlayerCards, "" ]
-			}
-		}
-	}
 </script>
 
 <style>
