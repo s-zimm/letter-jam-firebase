@@ -55,6 +55,17 @@
     .subdued {
         color: rgb(131, 131, 131);
     }
+
+    @media screen and (max-width: 600px) {
+        .card {
+            width: 60px;
+            height: 70px;
+        }
+
+        .main-letter {
+            font-size: 40px;
+        }
+    }
 </style>
 
 {#if !disabled}
@@ -65,7 +76,7 @@
         </div>
     </div>
 {:else}
-    <div class="card disabled" class:selected>
+    <div class="card disabled" class:subdued class:selected>
         <div class="top-letter">{letter}</div>
         <div class="main-letter">
             {letter}
