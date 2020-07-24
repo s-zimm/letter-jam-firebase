@@ -10,6 +10,12 @@ exports.startGame = functions.firestore
     const previousRoomRef = change.before.data();
     const currentRoomRef = change.after.data();
     const roomCode = context.params.roomCode;
+    const roomRef = db.collection("rooms").doc(roomCode);
+    if (previousRoomRef.timeChanged !== currentRoomRef.timeChanged) {
+      console.log("Timestamp updated for room: ", roomCode);
+    } else {
+      roomRef.update({ timeChanged: context.timestamp });
+    }
     // prettier-ignore
     const fullLettersList = ["A", "A", "A", "A", "B", "B", "C", "C", "C", "D", "D", "D", "E", "E", 
     "E", "E", "E", "E", "F", "F", "G", "G", "H", "H", "H", "I", "I", "I", "I", "K", "K", "L", "L", 
@@ -67,7 +73,7 @@ exports.startGame = functions.firestore
         initialCards: deckSplitsForInitialWords[i],
       }));
 
-      db.collection("rooms").doc(roomCode).update({
+      roomRef.update({
         players: playersWithCards,
       });
     }
@@ -129,13 +135,21 @@ exports.startGame = functions.firestore
       const gameConfig = gameSetupConfig[numPlayers];
       let nonPlayerStands = null;
       const cluesLeft = [];
-      for (var ndex = 0; ndex < gameConfig.requiredPerPlayer * numPlayers; ndex++) {
+      for (
+        var ndex = 0;
+        ndex < gameConfig.requiredPerPlayer * numPlayers;
+        ndex++
+      ) {
         cluesLeft.push("red");
       }
-      for (var ndex2 = 0; ndex2 < gameConfig.total - (gameConfig.requiredPerPlayer * numPlayers); ndex2++) {
-        cluesLeft.push("green");  
+      for (
+        var ndex2 = 0;
+        ndex2 < gameConfig.total - gameConfig.requiredPerPlayer * numPlayers;
+        ndex2++
+      ) {
+        cluesLeft.push("green");
       }
-      gameConfig.requiredPerPlayer
+      gameConfig.requiredPerPlayer;
       if (numPlayers < 6) {
         nonPlayerStands = gameConfig.standConfig.reduce(
           (obj, numCards, i) => ({
@@ -145,7 +159,7 @@ exports.startGame = functions.firestore
           {}
         );
       }
-      db.collection("rooms").doc(roomCode).update({
+      roomRef.update({
         players: playerListWithDealtSecretWords,
         shuffledDeck,
         nonPlayerStands,
@@ -153,6 +167,21 @@ exports.startGame = functions.firestore
         cluesLeft,
         // THIS LINE IS EXTREMELY IMPORTANT AS IT STOPS THE FN FROM INFINITELY LOOPING
         gamePhase: "main",
+      });
+    }
+
+    const allPlayersDone =
+      currentRoomRef.players.filter(
+        (player) => player.guessedLetters && player.guessedLetters.length < 5
+      ).length === 0;
+    const playersWereNotDone =
+      previousRoomRef.players.filter(
+        (player) => player.guessedLetters && player.guessedLetters.length < 5
+      ).length > 0;
+
+    if (allPlayersDone && playersWereNotDone && gamePhase !== "reveal") {
+      roomRef.update({
+        gamePhase: "reveal",
       });
     }
   });
