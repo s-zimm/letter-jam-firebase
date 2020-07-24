@@ -50,10 +50,26 @@
             updatedCluesLeft.splice(index, 1);
 			const updatedClues = [ ...player.clues, clueColor ];
 			return { ...player, clues: updatedClues }
-        })
+		});
+
+		const cluesGivenFromNpcStands = [];
+		const chosenNpcStandIndexes = letterObjects
+										.filter(letters => letter.player === 'NPC')
+										.map(letterObj => letterObj.index);
+		const updatedNpcStands = $room.nonPlayerStands.map((letterList, i) => {
+			if (chosenNpcStandIndexes.indexOf(i) === -1) {
+				return letterList;
+			}
+			if (letterList.length === 1) {
+				cluesGivenFromNpcStands.push("green");
+			}
+			letterList.pop();
+			return letterList;
+		});
+		
         roomRef.update({ 
 			players: updatedPlayers,
-			cluesLeft: updatedCluesLeft,
+			cluesLeft: updatedCluesLeft.concat(cluesGivenFromNpcStands),
 			currentClue: letterObjects
 		});
 		letterObjects = [];
@@ -215,8 +231,10 @@
                             <h3 style="text-align:center">{npc.length} left</h3>
                             <Card 
 								selected={letterObjects.find(obj => obj.index === i && obj.player === 'NPC')}
-								letter={npc[0]}
+								letter={npc.length > 0 ? npc[0] : 'X'}
 								on:click={(event) => handleCardClick(event.detail, i, 'NPC')}
+								disabled={npc.length === 0}
+								subdued={npc.length === 0}
 							/>
                         </FlexContainer>
                     {/each}
