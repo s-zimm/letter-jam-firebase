@@ -54,23 +54,23 @@
 
 		const cluesGivenFromNpcStands = [];
 		const chosenNpcStandIndexes = letterObjects
-										.filter(letters => letter.player === 'NPC')
+										.filter(letter => letter.player === 'NPC')
 										.map(letterObj => letterObj.index);
-		const updatedNpcStands = $room.nonPlayerStands.map((letterList, i) => {
-			if (chosenNpcStandIndexes.indexOf(i) === -1) {
-				return letterList;
-			}
-			if (letterList.length === 1) {
+		const updatedNpcStands = {
+			...$room.nonPlayerStands
+		};
+		chosenNpcStandIndexes.forEach(index => {
+			if (updatedNpcStands[index].length === 1) {
 				cluesGivenFromNpcStands.push("green");
-			}
-			letterList.pop();
-			return letterList;
+			} 
+			updatedNpcStands[index].shift();
 		});
 		
         roomRef.update({ 
 			players: updatedPlayers,
 			cluesLeft: updatedCluesLeft.concat(cluesGivenFromNpcStands),
-			currentClue: letterObjects
+			currentClue: letterObjects,
+			nonPlayerStands: updatedNpcStands
 		});
 		letterObjects = [];
 	}
@@ -81,22 +81,50 @@
 	}
 
 	const submitGuess = () => {
+		let permanentBonusLetters = $room.permanentBonusLetters
+			? [ ...$room.permanentBonusLetters ]
+			: [];
+		let updatedDeck = [ ...$room.shuffledDeck ];
 		const updatedPlayers = $room.players.map(player => {
             if (player.name !== $playerName) {
                 return player;
 			}
 
-			return {
-				...player,
-				guessedLetters: player.guessedLetters
-					? [ ...player.guessedLetters, currentLetterGuess ]
-					: [ currentLetterGuess ]
+			let updatedPlayer;
+			if (player.guessedLetters && player.guessedLetters.length >= 4) {
+				if (player.extraLetter) {
+					player.extraLetter === currentLetterGuess
+						? permanentBonusLetters.push(currentLetterGuess)
+						: null
+				}
+				updatedPlayer = {
+					...player,
+					extraLetter: updatedDeck.pop()
+				};
+				
+			} else {
+				updatedPlayer = {
+					...player,
+					currentVisibleIndex: player.currentVisibleIndex + 1,
+					guessedLetters: player.guessedLetters
+						? [ ...player.guessedLetters, currentLetterGuess ]
+						: [ currentLetterGuess ]
+				};
 			}
+
+			return updatedPlayer
 		});
 
-		db.collection('rooms').doc($roomCodeState).update({
-			players: updatedPlayers
-		});
+		const roomUpdate = {
+			players: updatedPlayers,
+			shuffledDeck: updatedDeck
+		}
+
+		if (permanentBonusLetters.length > 0) {
+			roomUpdate.permanentBonusLetters = permanentBonusLetters;
+		}
+
+		db.collection('rooms').doc($roomCodeState).update(roomUpdate);
 		currentLetterGuess = "";
 		movingOn = false;
 	}
@@ -161,30 +189,42 @@
 								<Button on:click={handleConfirmSuggestion}><span style="color:red">Are you sure?</span></Button>
 							{/if}
 						</FlexContainer>
-						<FlexContainer justify="center" align="center" direction="column">					
-							{#if movingOn}
-								{#if currentLetterGuess}
-									<Button on:click={submitGuess}>Confirm</Button>
+						<div style="margin-top:10px">
+							<FlexContainer justify="center" align="center" direction="column">					
+								{#if movingOn}
+									{#if currentLetterGuess}
+										<Button on:click={submitGuess}>Confirm</Button>
+									{:else}
+										<Button on:click={handleCancelGuess}>Cancel</Button>
+									{/if}
 								{:else}
-									<Button on:click={handleCancelGuess}>Cancel</Button>
+									<Button on:click={() => movingOn = true}>Move On</Button>
 								{/if}
-							{:else}
-								<Button on:click={() => movingOn = true}>Move On</Button>
-							{/if}
-							{#if movingOn}
-								<LetterSelect on:change={({ detail }) => currentLetterGuess = detail}/>
-							{/if}
-						</FlexContainer>
+								{#if movingOn}
+									<LetterSelect on:change={({ detail }) => currentLetterGuess = detail}/>
+								{/if}
+							</FlexContainer>
+						</div>
 					</FlexContainer>
                 </FlexContainer>
             </div>
         </FlexContainer>
         <FlexContainer width="100%" height="65%" justify="center" align="center" wrap="wrap">
+			{#if $room.permanentBonusLetters}
+				<div class="player-cards-container">
+					<h3>PERMANENT BONUS LETTERS</h3>
+					<FlexContainer width="100%" justify="center" wrap="wrap">
+						{#each $room.permanentBonusLetters as letter}
+							<Card {letter} on:click={(event) => handleCardClick(event.detail, 'BONUS', 'BONUS')}/>
+						{/each}
+					</FlexContainer>
+				</div>
+			{/if}
             {#each $room.players as player}
                 <div class="player-cards-container">
                     <FlexContainer align="center">
                         <h3>{player.name}{player.name === $playerName ? " (Me)" : ""}</h3>
-                        {#if player.clues > 0}
+                        {#if player.clues.length > 0}
                             {#each player.clues as clueColor}
                                 <ClueToken color="{clueColor}" />
                             {/each}
@@ -208,6 +248,9 @@
 								<Card letter={player.guessedLetters && player.guessedLetters[i] ? player.guessedLetters[i] : ""} subdued={true} />
 							{/each}
 						{/if}
+						{#if player.extraLetter}
+							<Card letter={player.name === $playerName ? "" : player.extraLetter} />
+						{/if}
                     </FlexContainer>
                 </div>
             {/each}
@@ -222,10 +265,8 @@
                             <h3 style="text-align:center">{npc.length} left</h3>
                             <Card 
 								selected={letterObjects.find(obj => obj.index === i && obj.player === 'NPC')}
-								letter={npc.length > 0 ? npc[0] : 'X'}
+								letter={npc[0]}
 								on:click={(event) => handleCardClick(event.detail, i, 'NPC')}
-								disabled={npc.length === 0}
-								subdued={npc.length === 0}
 							/>
                         </FlexContainer>
                     {/each}
