@@ -74,13 +74,24 @@
 				updatedNpcStands[index].push(updatedShuffledDeck.shift());
 			}
 		});
+
+		const playerToVisibleIndex = $room.players.reduce((acc, player) => 
+			({ ...acc, [player.name]: player.currentVisibleIndex}), {});
+		const letterObjsWithPlayerIndexes = {
+			playerToVisibleIndex,
+			letterObjects
+		}
+		const wordLog = $room.wordLog
+			? { ...$room.wordLog, [Object.keys($room.wordLog).length]: letterObjsWithPlayerIndexes }
+			: { 0: letterObjsWithPlayerIndexes }
 		
         roomRef.update({ 
 			players: updatedPlayers,
 			cluesLeft: updatedCluesLeft.concat(cluesGivenFromNpcStands),
 			currentClue: letterObjects,
 			nonPlayerStands: updatedNpcStands,
-			shuffledDeck: updatedShuffledDeck
+			shuffledDeck: updatedShuffledDeck,
+			wordLog
 		});
 		letterObjects = [];
 	}
@@ -167,12 +178,22 @@
         display: flex;
         justify-content: center;
     }
+
+	.alphabet-list {
+		color: #afafaf;
+		margin: 5px;
+	}
 </style>
 
 {#if $room.gamePhase !== 'main'}
     <Loader />
 {:else}
     <FlexContainer width="100%" height="100%" direction="column">
+		<FlexContainer width="100%" height="5%" justify="center">
+            <span class="alphabet-list">
+				A B C D E F G H I K L M N O P R S T U W Y
+			</span>
+        </FlexContainer>
         <FlexContainer width="100%" height="5%" justify="center">
             {#each $room.cluesLeft as clueColor}
                 <ClueToken color={clueColor} size="15px"/>
