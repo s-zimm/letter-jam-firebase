@@ -112,7 +112,7 @@
 			}
 
 			let updatedPlayer;
-			if (player.guessedLetters && player.guessedLetters.length > 4) {
+			if (player.guessedLetters && player.guessedLetters.length >= 4) {
 				if (player.extraLetter) {
 					player.extraLetter === currentLetterGuess
 						? permanentBonusLetters.push(currentLetterGuess)
@@ -122,6 +122,9 @@
 					...player,
 					extraLetter: updatedDeck.pop()
 				};
+				if (player.guessedLetters.length === 4) {
+					updatedPlayer.guessedLetters = [ ...player.guessedLetters, currentLetterGuess ];
+				}
 				
 			} else {
 				updatedPlayer = {
@@ -266,7 +269,7 @@
                     <FlexContainer width="100%" justify="center" wrap="wrap">
 						{#if player.name !== $playerName}
 							{#each player.secretWord.letters as letter, i}
-								{#if i === player.currentVisibleIndex}
+								{#if !player.extraLetter && i === player.currentVisibleIndex}
 									<Card
 										selected={letterObjects.find(obj => obj.index === i && obj.player === player.name)}
 										{letter}

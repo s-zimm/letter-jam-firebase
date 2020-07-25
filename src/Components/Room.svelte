@@ -18,7 +18,7 @@
         if (theRoom.exists) {
             room.set(theRoom.data());
             if (!$playerName) {
-                const playerInfo = JSON.parse(localStorage.getItem(`LETTER_JAM_ROOM`));
+                const playerInfo = JSON.parse(localStorage.getItem(`LETTER_JAM_ROOM:${roomCode}`));
                 playerName.set(playerInfo.name);
                 isRoomCreator.set(playerInfo.isRoomCreator);
             }
@@ -34,9 +34,10 @@
             if (roomCode && get(playerName)) {
                 const playerInfo = {
                     name: get(playerName),
-                    isRoomCreator: get(isRoomCreator)
+                    isRoomCreator: get(isRoomCreator),
+                    roomCode
                 }
-                localStorage.setItem(`LETTER_JAM_ROOM`, JSON.stringify(playerInfo));
+                localStorage.setItem(`LETTER_JAM_ROOM:${roomCode}`, JSON.stringify(playerInfo));
             }
         });
     
