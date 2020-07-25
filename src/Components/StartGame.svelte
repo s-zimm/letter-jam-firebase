@@ -7,19 +7,18 @@
 
     let name = '';
 
-    function generateNewRoom() {
+    async function generateNewRoom() {
         name = name.trim();
-        db.collection('rooms').add({
+        const docRef = await db.collection('rooms').add({
             players: [{ name }],
             gameStarted: false
-        }).then(docRef => {
-            const roomCode = docRef.id;
-            room.update(current => ({ roomCode, players: [{ name }], gameStarted: false }));
-            playerName.set(name);
-            isRoomCreator.set(true);
-            roomCodeState.set(roomCode);
-            navigate(`/room/${roomCode}`);
-        })
+        });
+        const roomCode = docRef.id;
+        room.update(current => ({ roomCode, players: [{ name }], gameStarted: false }));
+        playerName.set(name);
+        isRoomCreator.set(true);
+        roomCodeState.set(roomCode);
+        navigate(`/room/${roomCode}`);
     }
 </script>
 
