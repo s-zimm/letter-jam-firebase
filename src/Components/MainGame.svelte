@@ -285,7 +285,7 @@
 							{/each}
 						{/if}
 						{#if player.extraLetter}
-							<Card letter={player.name === $playerName ? "" : player.extraLetter} />
+							<Card letter={player.name === $playerName ? "" : player.extraLetter} on:click={(event) => handleCardClick(event.detail, 'EXTRA', player.name)}/>
 						{/if}
                     </FlexContainer>
                 </div>
