@@ -4,6 +4,19 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 const db = admin.firestore();
 
+exports.scheduledFunction = functions.pubsub.schedule('every day 00:00').timeZone('America/New_York').onRun(async (context) => {
+  const rooms = await db.collection("rooms").get();
+  rooms.forEach(room => {
+    const roomData = room.data();
+    const currentTimestamp = new Date();
+    var hours = Math.abs(currentTimestamp - new Date(roomData.timeChanged)) / 36e5;
+    if (hours > 6) {
+      return db.collection('rooms').doc(room.id).delete();
+    }
+  })
+  return null;
+});
+
 exports.startGame = functions.firestore
   .document("rooms/{roomCode}")
   .onUpdate(async (change, context) => {
