@@ -5,6 +5,7 @@
     import Game from './Game.svelte'
     import { get } from 'svelte/store';
     import { onMount } from 'svelte';
+    import { navigate } from 'svelte-routing';
 
     import { room, playerName, isRoomCreator } from '../store';
     import { db } from '../firebase.js';
@@ -12,13 +13,17 @@
     export let roomCode;
 
     onMount(async () => {
-        if (roomCode && !get(playerName)) {
-            const playerInfo = JSON.parse(localStorage.getItem(`LETTER_JAM_ROOM:${roomCode}`));
-            playerName.set(playerInfo.name);
-            isRoomCreator.set(playerInfo.isRoomCreator);
-            const roomRef = db.collection('rooms').doc(roomCode);
-            const theRoom = await roomRef.get();
+        const roomRef = db.collection('rooms').doc(roomCode);
+        const theRoom = await roomRef.get();
+        if (theRoom.exists) {
             room.set(theRoom.data());
+            if (!$playerName) {
+                const playerInfo = JSON.parse(localStorage.getItem(`LETTER_JAM_ROOM`));
+                playerName.set(playerInfo.name);
+                isRoomCreator.set(playerInfo.isRoomCreator);
+            }
+        } else {
+            navigate('/not-found');
         }
     })
 
@@ -31,14 +36,14 @@
                     name: get(playerName),
                     isRoomCreator: get(isRoomCreator)
                 }
-                localStorage.setItem(`LETTER_JAM_ROOM:${roomCode}`, JSON.stringify(playerInfo));
+                localStorage.setItem(`LETTER_JAM_ROOM`, JSON.stringify(playerInfo));
             }
         });
     
 </script>
 
 <FlexContainer>
-    {#if $room.gameStarted}
+    {#if $room && $room.gameStarted}
         <Game />
     {:else if !$playerName}
         <JoinGame {roomCode} />

@@ -58,7 +58,7 @@
     <FlexContainer justify="center" align="center" width="10%" height="100%">
         <img on:click={() => navigate('/')} src="/images/bluebnstrawb.png" alt="Logo" />
     </FlexContainer>
-    {#if !$room.gameStarted}
+    {#if !$room || !$room.gameStarted}
         <FlexContainer justify="space-around" width="380px">
             {#each navItems as item}
                 <Link to={item.route}>
@@ -66,7 +66,7 @@
                 </Link>
             {/each}
         </FlexContainer>
-    {:else if $room.currentClue}
+    {:else if $room && $room.currentClue}
         <FlexContainer width="80%" height="100%" justify="center" align="center">
             {#each $room.currentClue as { letter, player }}
                 <span class="clue">{player === $playerName ? '?' : letter}</span>

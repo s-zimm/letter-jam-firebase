@@ -4,6 +4,7 @@
 	import Navbar from './Components/Navbar.svelte';
 	import StartGame from './Components/StartGame.svelte';
 	import Room from './Components/Room.svelte';
+	import RoomNotFound from './Components/RoomNotFound.svelte';
 
 	export let url = "";
 </script>
@@ -26,6 +27,7 @@
 		<Navbar />
 		<div class="main-content-container">
 			<Route component={StartGame} path="game/start"/>
+			<Route path="not-found" component={RoomNotFound} />
 			<Route path="room/:code" let:params><Room roomCode={params.code} /></Route>
 		</div>
 	</div>
